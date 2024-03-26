@@ -126,7 +126,7 @@ def perform_lawnmower_pattern(field_width, field_length, altitude):
 arm_and_takeoff(10)
 
 # Perform the mowing pattern over a specified width and length.
-perform_lawnmower_pattern(30, 50, 10)
+perform_lawnmower_pattern(30, 30, 10)
 
 # Land the drone
 print("Setting LAND mode...")
