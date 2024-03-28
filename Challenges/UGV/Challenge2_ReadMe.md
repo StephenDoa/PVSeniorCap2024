@@ -8,7 +8,7 @@ Run this in your command line
 
 Screenshot example:
 
-![Screenshot of command line running dronekit rover command](./../../Images/Screenshot 2024-03-27 202808.png)
+![Screenshot of command line running dronekit rover command](https://github.com/StephenDoa/PVSeniorCap2024/blob/UGV_Challenge_2/Images/dronekit_rover_command_line_screenshot.png)
 
 ### 2. Run file in your IDE/ Code editor of choice.
 Run the UGV Challenge_2 file.
