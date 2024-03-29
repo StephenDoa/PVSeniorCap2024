@@ -1,11 +1,10 @@
 import math
 import time
 
-from dronekit import connect, Command, VehicleMode, LocationGlobalRelative
+from dronekit import connect, VehicleMode, LocationGlobalRelative
 
 # Set up option parsing to get connection string
 import argparse
-from dronekit import connect
 
 parser = argparse.ArgumentParser(description='Demonstrates mission import/export from a file.')
 parser.add_argument('--connect',
@@ -13,7 +12,6 @@ parser.add_argument('--connect',
 args = parser.parse_args()
 
 connection_string = args.connect
-sitl = None
 
 # Start SITL if no connection string specified
 if not connection_string:
@@ -22,6 +20,14 @@ if not connection_string:
     sitl = dronekit_sitl.start_default()
     connection_string = sitl.connection_string()
 
+print("")
+print("")
+print("--------------------")
+print("STARTING CHALLENGE UAV 1")
+print("--------------------")
+print("")
+print("")
+
 # Connect to the Vehicle
 print('Connecting to vehicle on: %s' % connection_string)
 
@@ -29,12 +35,15 @@ print('Connecting to vehicle on: %s' % connection_string)
 vehicle = connect(connection_string, wait_ready=True)
 
 # Competition dimensions and guidelines
-distance = 30  # Distance in meters
-speed = 0.17  # Speed in meters_per_second
+field_size_yards = 30  # Field size in yards
+speed_in_yards_per_second = 1 / 12  # Speed in yards per second
+
+# Calculate the finishing line location (slightly beyond the 30 yards line)
+finishing_line_location_yards = field_size_yards + 1  # Adjust as needed
 
 
 # Calculates the target location
-def calculate_target_location(current_ugv_location):
+def calculate_target_location(current_ugv_location, distance):
     d_lat = distance * math.cos(math.radians(current_ugv_location.lat))
     d_lon = distance * math.sin(math.radians(current_ugv_location.lon))
     target_location = LocationGlobalRelative(current_ugv_location.lat + d_lat, current_ugv_location.lon + d_lon,
@@ -47,10 +56,10 @@ def perform_straight_line_movement():
     """
           This function moves the vehicle along a straight line.
           """
-    # Calculate time to traverse the distance using the formula: time = distance/speed
-    time_to_traverse = distance / speed
+    # Calculate time to traverse the field size using the formula: time = field_size/speed
+    time_to_traverse = field_size_yards / speed_in_yards_per_second
 
-    print(f"Time to traverse: {time_to_traverse} sec(s)")
+    print(f"Time to traverse the field: {int(time_to_traverse // 60)} min {int(time_to_traverse % 60)} sec(s)")
 
     # Set the vehicle to GUIDED mode
     vehicle.mode = VehicleMode("GUIDED")
@@ -64,7 +73,8 @@ def perform_straight_line_movement():
 
     print("Vehicle armed!")
 
-    target_location = calculate_target_location(vehicle.location.global_relative_frame)
+    # Calculate target location (slightly beyond the 30 yards line)
+    target_location = calculate_target_location(vehicle.location.global_relative_frame, finishing_line_location_yards)
     print(f"Calculated Target Location: {target_location.lat}, {target_location.lon}")
 
     # Move to the target location
@@ -78,18 +88,28 @@ def perform_straight_line_movement():
             break
 
         # Updates the distance covered
-        distance_covered = min(speed * time_elapsed, distance)
+        distance_covered_yards = min(speed_in_yards_per_second * time_elapsed, field_size_yards)
 
-        print(f"Time elapsed: {time_elapsed} sec, Distance covered: {distance_covered:.2f} meters. ")
+        # Convert time elapsed to minutes and seconds
+        minutes = int(time_elapsed // 60)
+        seconds = int(time_elapsed % 60)
+
+        print(f"Time elapsed: {minutes} min {seconds} sec, Distance covered: {distance_covered_yards:.2f} yards.")
         time.sleep(1)
 
-    print("UGV Reached destination!")
+    print("UGV Crossed the finishing line!")
 
 
-# Perform straight line movement given the speed and distance.
-# Currently set at 30 meters for distance and 0.17m/s for speed.
+# Perform straight line movement given the speed and field size.
+# Currently set at 30 yards for field size and ~12 seconds per yard for speed.
 perform_straight_line_movement()
 
 # Disarm and close connection
 vehicle.armed = False
 vehicle.close()
+
+print("")
+print("")
+print("--------------------")
+print("Completed UAV CHALLENGE 1")
+print("--------------------")
