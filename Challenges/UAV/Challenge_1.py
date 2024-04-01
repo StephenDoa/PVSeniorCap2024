@@ -68,18 +68,18 @@ def arm_and_takeoff(a_target_altitude):
 
 def perform_lawnmower_pattern(field_width, field_length, altitude):
     """
-       This function executes a lawn mower pattern over a specified area.
+    This function executes a lawn mower pattern over a specified area.
 
-       :param field_width: The width of the field in feet.
-       :param field_length: The length of the field in feet.
-       :param altitude: The altitude at which the drone will fly, in meters.
-       """
+    :param field_width: The width of the field in yards.
+    :param field_length: The length of the field in yards.
+    :param altitude: The altitude at which the drone will fly, in meters.
+    """
     global waypoint
     home_location = vehicle.location.global_frame
 
-    # Moves forward by 2 feet to take into account the starting position
+    # Moves forward by 2 yards to take into account the starting position
     forward_position = LocationGlobalRelative(
-        home_location.lat + (2 / 111111),
+        home_location.lat + (2 / 111111 * 1.09361),  # Convert 2 yards to degrees
         home_location.lon,
         altitude
     )
@@ -94,14 +94,14 @@ def perform_lawnmower_pattern(field_width, field_length, altitude):
     )
 
     # Step size for the width iteration and can be adjusted based on the coverage we need.
-    step_size = 5
+    step_size = 5  # Adjust this value according to your requirement
 
     # First loop iterates over the width of the field.
     # Set the step_size to determine the spacing between two consecutive width-based waypoints.
     # Second loop iterates over the length of the field.
     for x in range(0, field_width, step_size):
         for y in range(0, field_length, 5):
-            waypoint_lat = initial_position.lat + x / 111111
+            waypoint_lat = initial_position.lat + x / (111111 * 1.09361)  # Convert yards to degrees
             waypoint_lon = initial_position.lon + y / (111111 * cos(radians(initial_position.lat)))
 
             if x % (2 * step_size) != 0:  # Reverse the direction every other row
@@ -112,15 +112,14 @@ def perform_lawnmower_pattern(field_width, field_length, altitude):
             vehicle.simple_goto(waypoint)
             time.sleep(2)
 
-    # Moves forward by 2 feet to take into account the finishing line
+    # Moves forward by 2 yards to take into account the finishing line
     final_position = LocationGlobalRelative(
-        waypoint.lat + (2 / 111111),
+        waypoint.lat + (2 / (111111 * 1.09361)),  # Convert 2 yards to degrees
         waypoint.lon,
         altitude
     )
     vehicle.simple_goto(final_position)
     time.sleep(5)  # This is to make sure the drone gets to the final position
-
 
 # Arm and take off to an altitude of 10 meters.
 arm_and_takeoff(10)
